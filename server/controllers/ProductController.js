@@ -10,6 +10,8 @@ exports.createProduct = async (req, res) => {
     // Object로 보낼때
     //const { productId, productName, description, price, productImage } = req.body.data;
 
+    if (description.length > 60) return (req.status = 400);
+
     // 상품 데이터 생성
     const product = new Product({
       productId,
@@ -30,13 +32,19 @@ exports.createProduct = async (req, res) => {
 
 // 제품 검색
 exports.getProducts = async (req, res) => {
-  console.log(req.query);
+  // 페이지 계산
+  // const page = parseInt(req.query.page || "1", 10);
+
   try {
     // 데이터베이스에서 모든 제품을 조회
-    //const products = await Product.find();
+    const products = await Product.find();
 
     // 10개씩 보여주기
-    const products = await Product.find().limit(10);
+    // const products = await Product.find()
+    //   .limit(10)
+    //   .skip((page - 1) * 10)
+    //   .exec();
+
     res.status(200).json({ length: products.length, products });
   } catch (error) {
     res.status(500).json({ error: "Failed to get products" });
@@ -46,6 +54,7 @@ exports.getProducts = async (req, res) => {
 // 제품 상세 검색
 exports.getDetailProducts = async (req, res) => {
   const { id } = req.params;
+
   try {
     // 모든 제품을 데이터베이스에서 조회
     const product = await Product.findById(id).exec();
