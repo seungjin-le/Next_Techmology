@@ -28,3 +28,4 @@ brew services start mongodb-community@6.0
 ```shell
 brew services stop mongodb-community@6.0
 ```
+

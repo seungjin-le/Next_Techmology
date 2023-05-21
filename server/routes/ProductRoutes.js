@@ -7,6 +7,7 @@ const {
   deleteProduct,
   getDetailProducts,
   upDateProduct,
+  uploadProductImage,
 } = require("../controllers/ProductController.js");
 
 // GET /products
@@ -16,7 +17,7 @@ router.get("/products", getProducts);
 router.get("/products/:id", getDetailProducts);
 
 // POST /products
-router.post("/products", createProduct);
+router.post("/products", uploadProductImage, createProduct);
 
 // PATCH upDateProduct
 router.patch("/products/:id", upDateProduct);

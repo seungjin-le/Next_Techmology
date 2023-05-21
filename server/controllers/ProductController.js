@@ -1,16 +1,49 @@
 const Product = require("../models/Product.js");
+const AWS = require("aws-sdk");
+const multer = require("multer");
+const multerS3 = require("multer-s3");
+const { awsS3 } = require("../config/config");
+
+const s3 = new AWS.S3({
+  accessKeyId: awsS3.accessKeyId,
+  secretAccessKey: awsS3.secretAccessKey,
+  region: awsS3.region,
+});
+
+// AWS S3이미지 업로드 요청
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: "testimagesstorage",
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: function (req, file, cb) {
+      const ext = file.mimetype.split("/")[1];
+      if (!["png", "jpg", "jpeg", "gif", "bmp"].includes(ext)) {
+        return cb(new Error("Only images are allowed"));
+      }
+      cb(
+        null,
+        "images/" + Date.now() + "." + file.originalname.split(".").pop()
+      );
+    },
+  }),
+  acl: "public-read-write",
+});
+exports.uploadProductImage = upload.single("productImage");
 
 // 상품 생성
 exports.createProduct = async (req, res) => {
+  console.log(req);
   try {
     // JSON으로 데이터를 보낼떄
-    const { productId, productName, description, price, productImage } =
-      req.body;
+    const { productId, productName, description, price } = req.body;
 
-    // Object로 보낼때
-    //const { productId, productName, description, price, productImage } = req.body.data;
+    // if (description.length > 60)
+    //   return res
+    //     .status(400)
+    //     .send({ message: "Description length exceeds limit." });
 
-    if (description.length > 60) return (req.status = 400);
+    const productImage = req.file ? req.file.location : "";
 
     // 상품 데이터 생성
     const product = new Product({
@@ -20,7 +53,7 @@ exports.createProduct = async (req, res) => {
       price,
       productImage,
     });
-
+    console.log(product);
     // 상품 저장
     await product.save();
 
@@ -67,7 +100,7 @@ exports.getDetailProducts = async (req, res) => {
 // 제품 데이터 수정
 exports.upDateProduct = async (req, res) => {
   const { id } = req.params;
-  console.log(id, req);
+
   try {
     // 데이터 수정
     const product = await Product.findByIdAndUpdate(id, req.body, {

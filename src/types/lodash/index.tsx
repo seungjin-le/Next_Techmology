@@ -16,4 +16,11 @@ declare module "lodash" {
   export interface CategoriesProps {
     categories: string[];
   }
+
+  export interface OnChangeProps {
+    target: {
+      id: string;
+      value: string | number | undefined;
+    };
+  }
 }
